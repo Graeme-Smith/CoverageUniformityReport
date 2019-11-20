@@ -12,18 +12,21 @@ library(htmlwidgets)
 # Functions:
 
 generate_coverage_plot <- function(df, panel) { 
+  # Remove rows with NAs caused by regions not included between panels  
+  df <- df[complete.cases(df), ]
+  # Reorder the factors in region by median (Ensures the boxplots are plotted in order form lowest to highest)
+  df$region <- fct_reorder(df$region, df$meanCoverage,.fun = median, .desc = FALSE)
+  # Create a color palette to highlight samples by gene/transcript
+  col=rainbow(length(levels(factor(df$gene))))[factor(df$gene)]
   # Plot coverage data (A series of boxplots showing coverage for each region, ordered by median)
   p <- df %>%
     ggplot( aes(x=region, y=meanCoverage)
     ) +
-    # geom_point(size = 0.25, shape = 1) +
     geom_boxplot(outlier.size = 0.5, aes(fill=gene)) +
     geom_jitter(color="grey", width = 0.01, size=1, alpha=0, shape = 1) +
     theme(
-      #legend.position="none",
       plot.title = element_text(size=11),
       axis.text.x = element_text(angle = 45, hjust = 1, size = 6)
-      #axis.text.x = NULL
     ) +
     ggtitle(paste("Run ", run_name,",  ", panel ,", Coverage over ", num_samples,"samples")) +
     xlab("Target Region") +
@@ -31,11 +34,11 @@ generate_coverage_plot <- function(df, panel) {
   return(p)
 }
 
-# Script:
+# Main Script:
 
 # Get directory location from commandline - directory should contain the Raw exon level coverage files
 data_directory <- commandArgs(trailingOnly = TRUE)
-
+data_directory <- "/home/graeme/Desktop/NGS300_coverage"
 # Import all files with the suffix "*.bed" from data directory
 sambamba_files <- list.files(path = data_directory, pattern = "*.refined.sambamba_output.bed", full.names = TRUE)
 
@@ -66,9 +69,7 @@ data_wide[,-1] <- scale(data_wide[,-1], scale=TRUE, center = FALSE)
 # Cast back to long format for visualisation
 data_long <- gather(data_wide, sample, meanCoverage, 2:33)
 
-# Visualise per exon metrics
-
-num_samples <- length(unique(data_long$sample))
+# Extract meta data from sample name
 run_name <- strsplit(data_long$sample, "_")[[1]][1]
 
 # Split column
@@ -80,17 +81,15 @@ data_long <- separate(data = data_long,
 data_long$gene[is.na(data_long$transcript)] <- "SNP" # Any SNPs referenced by their RS accession number will not have a transcript
 data_long$gene_transcript <- paste0(data_long$gene, ":", data_long$transcript)
 
-# Reorder the factors in region by median (Ensures the boxplots are plotted in order form lowest to highest)
-data_long$region <- fct_reorder(data_long$region, data_long$meanCoverage,.fun = median, .desc = FALSE)
-
-# Create a color palette to highlight samples by gene/transcript
-col=rainbow(length(levels(factor(data_long$gene))))[factor(data_long$gene)]
-
 # Identify Pan number from sample name and add as additional column
 data_long$pan_number <- stringr::str_split(string = data_long$sample, pattern = "_", simplify = TRUE)[,7]
 
 for(panel in unique(data_long$pan_number)){
+
   df <- data_long[data_long$pan_number==panel,]
+  
+  # Update number of samples to be plotted 
+  num_samples <- length(unique(df$sample))
   
   # Generate static plot of data for each
   static_plot <- generate_coverage_plot(df, panel)
@@ -101,5 +100,8 @@ for(panel in unique(data_long$pan_number)){
   # Save interactive plot as a single html file:
   filename <- paste0(run_name, "_", panel, "_coverage.html")
   saveWidget(ggplotly(interactive_plot), file = filename)
+  # Save table
+  filename <- paste0(run_name, "_", panel, "_coverage.csv")
+  write_delim(df, filename, delim = "\t")
 }
 
