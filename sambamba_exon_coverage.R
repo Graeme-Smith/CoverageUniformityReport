@@ -4,13 +4,11 @@ library(plotly)
 library(magrittr)
 library(htmlwidgets)
 
-# Purpose: This script takes the RAW output from sambamba and produces sum,mary tables and plots of the data
+# Purpose: This script takes the RAW output from sambamba and produces summary tables and plots highlighting the uniformity of coverage
 
 # Usage: Rscript chanjo_exon_coverage.R --args "/path_to_folder/exon_coverage"
 
 # Functions:
-
-# TODO refactor the two functions below into one with a 'simplify' boolean flag
 
 generate_coverage_plot <- function(df, panel) { 
   # Remove rows with NAs caused by regions not included between panels  
@@ -67,8 +65,8 @@ scale_this <- function(x) as.vector(scale(x, scale=TRUE, center = FALSE))
 # Main Script:
 
 # Get directory location from commandline - directory should contain the Raw exon level coverage files
-#data_directory <- commandArgs(trailingOnly = TRUE)
-data_directory <- "/home/graeme/Desktop/NGS300_coverage/"
+data_directory <- commandArgs(trailingOnly = TRUE)
+#data_directory <- "/home/graeme/Desktop/NGS300_coverage/"
 
 # Get all files with the suffix "*.bed" from data directory
 sambamba_files <- list.files(path = data_directory, pattern = "*.refined.sambamba_output.bed", full.names = TRUE)
@@ -82,7 +80,7 @@ tbl$sample_id <- gsub(basename(tbl$sample_id), pattern = ".refined.sambamba_outp
 # Rename 2nd column to remove proceding '#'
 colnames(tbl)[2] <- "chrom"
 # Replace F1:F6 labels with meaningful names
-# TODO find out what column F$ represents and rename accordingly
+# TODO find out what column F4 represents and rename accordingly
 colnames(tbl)[5:9] <- c("genomicCoordinates", "F4", "strand", "gene_transcript", "accessionNum")
 
 # Add new column 'region' so that each target region is represented by unique ID
@@ -99,8 +97,6 @@ tbl <- tbl %>%
 
 # Identify Run ID from sample name and add as additional column
 tbl$run_name <- stringr::str_split(string = tbl$sample_id, pattern = "_", simplify = TRUE)[,1] 
-# TODO: Add run ID to dataframe and add additional for loop below so that separate runs can be processed together
-
 # Extract gene and transcript names into separate columns:
 tbl$gene <- stringr::str_split(string = tbl$gene_transcript, pattern = ";", simplify = TRUE)[,1]
 tbl$transcript <- stringr::str_split(string = tbl$gene_transcript, pattern = ";", simplify = TRUE)[,2]
@@ -138,10 +134,7 @@ for(panel in unique(tbl$pan_number)){
   ggsave(filename = filename, simplified_plot)
   # Save table
   filename <- paste0(run_name, "_", panel, "_coverage.csv")
-  write_delim(df, filename, delim = "\t")
+  simplified_df <- select(df, sample_id, run_name, pan_number, gene, transcript, genomicCoordinates, accessionNum, percentage30, scaled_meanCoverage)
+  write_delim(simplified_df, filename, delim = "\t")
 }
 }
-
-
-
-
