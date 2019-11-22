@@ -25,7 +25,7 @@ generate_coverage_plot <- function(df, panel) {
       plot.title = element_text(size=11),
       axis.text.x = element_text(angle = 45, hjust = 1, size = 6)
     ) +
-    ggtitle(paste("Run ", run_name,",  ", panel ,", Coverage over ", num_samples,"samples")) +
+    ggtitle(paste0("Run ", run_name,",  ", panel ," (", num_target_regions," target regions), Coverage over ", num_samples," samples")) +
     xlab("Target Region") +
     ylab("Scaled average coverage")
   return(p)
@@ -35,10 +35,12 @@ generate_simple_coverage_plot <- function(df, panel) {
   # Remove rows with NAs caused by regions not included between panels  
   df <- df[complete.cases(df), ]
   # Group the tibble data structure by 'region'
-  df<- df %>% 
-    group_by(region)
   region_mean <- df %>% 
-    summarise(region_meanCoverage = mean(scaled_meanCoverage))
+    group_by(region) %>% 
+    summarise(gene = unique(gene),
+              transcript = unique(transcript),
+              genomicCoordinates = unique(genomicCoordinates),
+              region_meanCoverage = mean(scaled_meanCoverage))
   # Order region factors by region_meanCoverage to produce plot in correct order
   region_mean$region <- as.factor(region_mean$region)
   region_mean$region <- fct_reorder(region_mean$region, region_mean$region_meanCoverage,.fun = median, .desc = FALSE)
@@ -51,7 +53,7 @@ generate_simple_coverage_plot <- function(df, panel) {
       plot.title = element_text(size=11),
       axis.text.x = element_text(angle = 45, hjust = 1, size = 1)
     ) +
-    ggtitle(paste("Run ", run_name,",  ", panel ,", Coverage over ", num_samples,"samples")) +
+    ggtitle(paste0("Run ", run_name,",  ", panel ," (", num_target_regions," target regions), Coverage over ", num_samples," samples")) +
     xlab("Target Region") +
     ylab("Scaled average coverage")
 }
@@ -112,7 +114,8 @@ for(panel in unique(tbl$pan_number)){
   
   # Update number of samples to be plotted 
   num_samples <- length(unique(df$sample_id))
-  
+  # Update number of target regions for this panel
+  num_target_regions <- length(unique(df$region))  
   # Generate static plot of data for each
   static_plot <- generate_coverage_plot(df, panel)
   
@@ -129,10 +132,25 @@ for(panel in unique(tbl$pan_number)){
   saveWidget(ggplotly(interactive_plot), file = filename)
   # Save simplified plot to pdf:
   filename <- paste0(run_name, "_", panel, "_coverage.pdf")
-  ggsave(filename = filename, simplified_plot)
+  ggsave(filename = filename, 
+         simplified_plot,
+         device = "pdf",
+         width = 297,
+         height = 200,
+         units = "mm")
   # Save table
   filename <- paste0(run_name, "_", panel, "_coverage.csv")
-  simplified_df <- select(df, sample_id, run_name, pan_number, gene, transcript, genomicCoordinates, accessionNum, percentage30, scaled_meanCoverage)
-  write_delim(simplified_df, filename, delim = "\t")
+  summary_df <- df %>% 
+    group_by(region) %>% 
+    summarise(gene = unique(gene),
+              run_name = unique(run_name),
+              panel = unique(panel),
+              transcript = unique(transcript),
+              genomicCoordinates = unique(genomicCoordinates),
+              accessionNum = unique(accessionNum),
+              region_meanCoverage = mean(scaled_meanCoverage)) %>%
+    arrange(region_meanCoverage)
+  
+  write_delim(summary_df, filename, delim = "\t")
 }
 }
