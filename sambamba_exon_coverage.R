@@ -67,7 +67,8 @@ scale_this <- function(x) as.vector(scale(x, scale=TRUE, center = FALSE))
 # Main Script:
 
 # Get directory location from commandline - directory should contain the Raw exon level coverage files
-data_directory <- commandArgs(trailingOnly = TRUE)
+#data_directory <- commandArgs(trailingOnly = TRUE)
+data_directory <- "/home/graeme/Desktop/NGS300_coverage/"
 
 # Get all files with the suffix "*.bed" from data directory
 sambamba_files <- list.files(path = data_directory, pattern = "*.refined.sambamba_output.bed", full.names = TRUE)
@@ -96,8 +97,8 @@ tbl <- tbl %>%
   group_by(sample_id) %>%
   mutate(scaled_meanCoverage = scale_this(meanCoverage))
 
-# Extract meta data from sample name
-run_name <- strsplit(tbl$sample_id, "_")[[1]][1]
+# Identify Run ID from sample name and add as additional column
+tbl$run_name <- stringr::str_split(string = tbl$sample_id, pattern = "_", simplify = TRUE)[,1] 
 # TODO: Add run ID to dataframe and add additional for loop below so that separate runs can be processed together
 
 # Extract gene and transcript names into separate columns:
@@ -108,6 +109,9 @@ tbl$gene[tbl$transcript==""] <- "dbSNP"
 # Identify Pan number from sample name and add as additional column
 tbl$pan_number <- stringr::str_split(string = tbl$sample_id, pattern = "_", simplify = TRUE)[,7]
 # Produce separate output for each panel
+
+# Extract meta data from sample name
+for(run_name in unique(tbl$run_name)){
 for(panel in unique(tbl$pan_number)){
 
   df <- tbl[tbl$pan_number==panel,]
@@ -136,7 +140,7 @@ for(panel in unique(tbl$pan_number)){
   filename <- paste0(run_name, "_", panel, "_coverage.csv")
   write_delim(df, filename, delim = "\t")
 }
-
+}
 
 
 
