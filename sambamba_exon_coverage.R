@@ -124,7 +124,6 @@ for(panel in unique(tbl$pan_number)){
   
   simplified_plot <- generate_simple_coverage_plot(df, panel)
   
-  # TODO refactor filename generation to remove duplication
   # Save interactive plot as a single html file:
   filename <- paste0(run_name, "_", panel, "_coverage.html")
   saveWidget(ggplotly(interactive_plot), file = filename)
