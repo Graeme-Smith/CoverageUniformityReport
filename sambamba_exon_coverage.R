@@ -79,8 +79,7 @@ tbl$sample_id <- gsub(basename(tbl$sample_id), pattern = ".refined.sambamba_outp
 # Rename 2nd column to remove proceding '#'
 colnames(tbl)[2] <- "chrom"
 # Replace F1:F6 labels with meaningful names
-# TODO find out what column F4 represents and rename accordingly
-colnames(tbl)[5:9] <- c("genomicCoordinates", "F4", "strand", "gene_transcript", "accessionNum")
+colnames(tbl)[5:9] <- c("genomicCoordinates", "score", "strand", "gene_transcript", "accessionNum")
 
 # Add new column 'region' so that each target region is represented by unique ID
 tbl$region <- paste(tbl$chrom,
@@ -141,7 +140,8 @@ for(panel in unique(tbl$pan_number)){
   filename <- paste0(run_name, "_", panel, "_coverage.csv")
   summary_df <- df %>% 
     group_by(region) %>% 
-    summarise(gene = unique(gene),
+  # Summarise data by region
+      summarise(gene = unique(gene),
               run_name = unique(run_name),
               panel = unique(panel),
               transcript = unique(transcript),
@@ -149,7 +149,6 @@ for(panel in unique(tbl$pan_number)){
               accessionNum = unique(accessionNum),
               region_meanCoverage = mean(scaled_meanCoverage)) %>%
     arrange(region_meanCoverage)
-  
   write_delim(summary_df, filename, delim = "\t")
 }
 }
