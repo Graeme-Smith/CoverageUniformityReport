@@ -20,7 +20,7 @@ RUN mkdir -p /output
 
 ## copy files
 COPY /src/install_packages.R /src/install_packages.R
-COPY /src/myScriptsambamba_exon_coverage.R /src/myScriptsambamba_exon_coverage.R 
+COPY /src/myScriptsambamba_exon_coverage.R /src/sambamba_exon_coverage.R 
 
 ## install R-packages
 RUN Rscript /src/install_packages.R
