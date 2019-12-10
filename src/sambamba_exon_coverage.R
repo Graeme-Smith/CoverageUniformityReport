@@ -4,7 +4,7 @@ library(htmlwidgets)
 
 # Purpose: This script takes the RAW output from sambamba and produces summary tables and plots highlighting the uniformity of coverage
 
-# Usage: Rscript chanjo_exon_coverage.R --args "/path_to_folder/exon_coverage"
+# Usage: Rscript sambamba_exon_coverage.R --args "/path_to_folder/exon_coverage"
 
 # Functions:
 
