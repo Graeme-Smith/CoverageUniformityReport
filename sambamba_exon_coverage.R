@@ -67,7 +67,7 @@ scale_this <- function(x) as.vector(scale(x, scale=TRUE, center = FALSE))
 # Get directory location from commandline - directory should contain the Raw exon level coverage files
 data_directory <- commandArgs(trailingOnly = TRUE)
 
-# Get all files with the suffix "*.bed" from data directory
+# Get all files with the suffix "*..refined.sambamba_output.bed" from data directory
 sambamba_files <- list.files(path = data_directory, pattern = "*.refined.sambamba_output.bed", full.names = TRUE)
 
 # Import coverage data and add relevant sample ID to each imported row 
@@ -88,7 +88,7 @@ tbl$region <- paste(tbl$chrom,
                     tbl$gene_transcript,
                     sep=";")
 
-# Group the tibble data structure by 'region'
+# Group the tibble data structure by samples so that average can be calculated accross samples
 tbl <- tbl %>% 
   group_by(sample_id) %>%
   mutate(scaled_meanCoverage = scale_this(meanCoverage))
