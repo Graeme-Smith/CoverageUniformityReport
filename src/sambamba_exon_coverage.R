@@ -65,9 +65,12 @@ scale_this <- function(x) as.vector(scale(x, scale=TRUE, center = FALSE))
 # Main Script:
 
 # Get directory location from commandline - directory should contain the Raw exon level coverage files
-args <- commandArgs(trailingOnly = TRUE)
-data_directory <- args[1]
-output_directory <- args[2]
+my_args <- commandArgs(trailingOnly = TRUE)
+data_directory <- my_args[1]
+output_directory <- my_args[2]
+
+# Create output directory if it does not already exists
+dir.create(output_directory, showWarnings = FALSE)
 
 # Get all files with the suffix "*..refined.sambamba_output.bed" from data directory
 sambamba_files <- list.files(path = data_directory, pattern = "*.refined.sambamba_output.bed", full.names = TRUE)
