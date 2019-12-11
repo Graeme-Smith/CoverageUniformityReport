@@ -126,19 +126,22 @@ for(panel in unique(tbl$pan_number)){
   
   simplified_plot <- generate_simple_coverage_plot(df, panel)
   
+  # Generate file name:
+  filename <- paste0(run_name, "_", panel)
+  
   # Save interactive plot as a single html file:
-  filename <- paste0(run_name, "_", panel, "_coverage.html")
-  saveWidget(ggplotly(interactive_plot), file = filename)
+  filepath <- paste0(output_directory, filename, "_coverage.html")
+  saveWidget(ggplotly(interactive_plot), file = filepath)
   # Save simplified plot to pdf:
-  filename <- paste0(run_name, "_", panel, "_coverage.pdf")
-  ggsave(filename = filename, 
+  filepath <- paste0(output_directory, filename, "_coverage.pdf")
+  ggsave(filename = filepath, 
          simplified_plot,
          device = "pdf",
          width = 297,
          height = 200,
          units = "mm")
   # Save table
-  filename <- paste0(run_name, "_", panel, "_coverage.csv")
+  filepath <- paste0(output_directory, filename, "_coverage.csv")
   summary_df <- df %>% 
     group_by(region) %>% 
   # Summarise data by region
@@ -150,6 +153,6 @@ for(panel in unique(tbl$pan_number)){
               accessionNum = unique(accessionNum),
               region_meanCoverage = mean(scaled_meanCoverage)) %>%
     arrange(region_meanCoverage)
-  write_delim(summary_df, filename, delim = "\t")
+  write_delim(summary_df, filepath, delim = "\t")
 }
 }
