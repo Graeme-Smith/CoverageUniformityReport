@@ -13,9 +13,8 @@ unixodbc-dev \
 libcurl4-openssl-dev \
 libssl-dev
 
-## create directories (Mirror directory structure)
+## create directories (Mirror directory structure, /src already exists)
 RUN mkdir -p /resources
-RUN mkdir -p /src
 RUN mkdir -p /output
 
 ## copy files
