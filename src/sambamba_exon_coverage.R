@@ -133,10 +133,10 @@ for(panel in unique(tbl$pan_number)){
   filename <- paste0(run_name, "_", panel)
   
   # Save interactive plot as a single html file:
-  filepath <- paste0(output_directory, filename, "_coverage.html")
+  filepath <- paste0(output_directory, '/', filename, "_coverage.html")
   saveWidget(ggplotly(interactive_plot), file = filepath)
   # Save simplified plot to pdf:
-  filepath <- paste0(output_directory, filename, "_coverage.pdf")
+  filepath <- paste0(output_directory, "/", filename, "_coverage.pdf")
   ggsave(filename = filepath, 
          simplified_plot,
          device = "pdf",
@@ -144,7 +144,7 @@ for(panel in unique(tbl$pan_number)){
          height = 200,
          units = "mm")
   # Save table
-  filepath <- paste0(output_directory, filename, "_coverage.csv")
+  filepath <- paste0(output_directory, "/", filename, "_coverage.csv")
   summary_df <- df %>% 
     group_by(region) %>% 
   # Summarise data by region
