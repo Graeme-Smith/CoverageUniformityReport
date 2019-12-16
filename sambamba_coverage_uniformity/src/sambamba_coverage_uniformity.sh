@@ -15,28 +15,37 @@
 # See https://wiki.dnanexus.com/Developer-Portal for tutorials on how
 # to modify this file.
 
+# Exit at any point if there is any error and output each line as it is executed (for debugging)
+set -e -x -o pipefail
+
+$selected_project
+
 main() {
+    # SET VARIABLES
+    # Store the API key. Grants the script access to DNAnexus resources    
+    API_KEY=$(dx cat project-FQqXfYQ0Z0gqx7XG9Z2b4K43:mokaguys_nexus_auth_key)
+    # Capture the project runfolder name. Names the multiqc HTML input and builds the output file path
+    
+    # Assign coverage report output directory name to variable and create (Hard coded)
+    outdir=coverage/uniformity_metrics && mkdir -p ${outdir}
 
-    echo "Value of input_project: '$input_project'"
+    # Sambamba files for are stored at 'selected_multiqc:coverage/raw_output/''. Download the contents of this folder.
+    dx download ${selected_project}:coverage/raw_output/* --auth ${API_KEY}
 
-    # Fill in your application code here.
-    #
-    # To report any recognized errors in the correct format in
-    # $HOME/job_error.json and exit this script, you can use the
-    # dx-jobutil-report-error utility as follows:
-    #
-    #   dx-jobutil-report-error "My error message"
-    #
-    # Note however that this entire bash script is executed with -e
-    # when running in the cloud, so any line which returns a nonzero
-    # exit code will prematurely exit the script; if no error was
-    # reported in the job_error.json file, then the failure reason
-    # will be AppInternalError with a generic error message.
+    # Call the docker image. This image is saved as a compressed tarball on DNAnexus, bundled with the app.
+    # Download the docker tarball - graemesmith_uniform_coverage.tar.gz
+    dx download project-ByfFPz00jy1fk6PjpZ95F27J:file-Fgk3QZ00jy1bjJxG4V7B6jpj
 
-    # The following line(s) use the utility dx-jobutil-add-output to format and
-    # add output variables to your job's output as appropriate for the output
-    # class.  Run "dx-jobutil-add-output -h" for more information on what it
-    # does.
+    # Give all users access to docker.sock
+    sudo chmod 666 /var/run/docker.sock
 
-    dx-jobutil-add-output output_directory "$output_directory" --class=string
+    # Load docker image from tarball
+    docker load < graemesmith_uniform_coverage.tar.gz
+
+    # The docker -v flag mounts a local directory to the docker environment in the format:
+    #    -v local_dir:docker_dir
+    docker run -it -v /home/dnanexus:/home --rm graemesmith/uniform-coverage Rscript "/src/sambamba_exon_coverage.R"  "/home" "/home/coverage/uniformity_metrics"
+
+    # Upload results to DNA nexus
+    dx upload /home/dnanexus/coverage/uniformity_metrics --recursive --path $selected_project:coverage/uniformity_metrics
 }
