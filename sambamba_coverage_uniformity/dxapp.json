@@ -1,5 +1,5 @@
 {
-  "name": "sambamba_coverage_uniformity",
+  "name": "sambamba_coverage_uniformity_v1.0",
   "title": "Calculate the average uniformity for each region in a Panel for all provided samples ",
   "summary": "For x samples this app uses the coverage bed files calculated by Sambamba to visualise the variability in coverage at each genomic region. It produces a separate rport for each panel Sambamba was run with.  Results are available as an interactive plot, simplified pdf plot, and csv table.",
   "dxapi": "1.0.0",
