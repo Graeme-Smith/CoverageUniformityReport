@@ -23,7 +23,7 @@ echo $selected_project
 main() {
     # SET VARIABLES
     # Store the API key. Grants the script access to DNAnexus resources    
-    API_KEY=$(dx cat project-FQqXfYQ0Z0gqx7XG9Z2b4K43:mokaguys_nexus_auth_key)
+    # API_KEY=$(dx cat project-FQqXfYQ0Z0gqx7XG9Z2b4K43:mokaguys_nexus_auth_key)
     # Capture the project runfolder name. Names the multiqc HTML input and builds the output file path
     
     # Assign coverage report output directory name to variable and create (Hard coded)
