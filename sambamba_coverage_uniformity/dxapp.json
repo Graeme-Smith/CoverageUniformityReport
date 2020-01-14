@@ -6,25 +6,17 @@
   "version": "0.0.1",
   "inputSpec": [
     {
-      "name": "input_project",
+      "name": "selected_project",
       "label": "Name of project holding Sambamba coverage bedfiles",
       "class": "string",
       "optional": false,
       "help": ""
     }
   ],
-  "outputSpec": [
-    {
-      "name": "output_directory",
-      "label": "Name of output directory for interactive html report, pdf plot, and csv table. ",
-      "class": "string",
-      "help": ""
-    }
-  ],
   "runSpec": {
     "timeoutPolicy": {
       "*": {
-        "minutes": 30
+        "minutes": 60
       }
     },
     "interpreter": "bash",

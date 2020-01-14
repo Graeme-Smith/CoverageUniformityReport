@@ -73,7 +73,7 @@ output_directory <- my_args[2]
 dir.create(output_directory, showWarnings = FALSE)
 
 # Get all files with the suffix "*..refined.sambamba_output.bed" from data directory
-sambamba_files <- list.files(path = data_directory, pattern = "*.refined.sambamba_output.bed", full.names = TRUE)
+sambamba_files <- list.files(path = data_directory, pattern = "*.sambamba_output.bed", full.names = TRUE)
 
 # Import coverage data and add relevant sample ID to each imported row 
 tbl <- sapply(sambamba_files , read_tsv, col_types = "ciicicccinnc", simplify=FALSE) %>% 
