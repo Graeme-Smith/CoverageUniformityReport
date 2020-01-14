@@ -32,6 +32,10 @@
     "distribution": "Ubuntu",
     "file": "src/sambamba_coverage_uniformity.sh"
   },
+  "access": {
+    "allProjects":"VIEW",
+    "network": [ "*" ]
+  },
   "regionalOptions": {
     "aws:us-east-1": {
       "systemRequirements": {
