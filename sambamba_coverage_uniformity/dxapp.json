@@ -13,6 +13,14 @@
       "help": ""
     }
   ],
+    "outputSpec": [
+    {
+      "name": "verifybamid_out",
+      "label": "verifyBamID output files",
+      "help": "verifyBamID contamination statistics, read depth distribution and log file",
+      "class": "array:file"
+    }
+    ],
   "runSpec": {
     "timeoutPolicy": {
       "*": {
