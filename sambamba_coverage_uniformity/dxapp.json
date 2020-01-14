@@ -15,9 +15,9 @@
   ],
     "outputSpec": [
     {
-      "name": "verifybamid_out",
-      "label": "verifyBamID output files",
-      "help": "verifyBamID contamination statistics, read depth distribution and log file",
+      "name": "coverage_summary_out",
+      "label": "Uniformity of coverage summary reports",
+      "help": "Uniformity of coverage Summary reports, inteactive html plot, static pdf plot, and csv table",
       "class": "array:file"
     }
     ],
