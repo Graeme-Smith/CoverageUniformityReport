@@ -80,7 +80,7 @@ tbl <- sapply(sambamba_files , read_tsv, col_types = "ciicicccinnc", simplify=FA
   bind_rows(.id = "sample_id")
 
 # Simplify & cleanup sample names
-tbl$sample_id <- gsub(basename(tbl$sample_id), pattern = ".refined.sambamba_output.bed", replacement = "")
+tbl$sample_id <- gsub(basename(tbl$sample_id), pattern = ".sambamba_output.bed", replacement = "")
 # Rename 2nd column to remove proceding '#'
 colnames(tbl)[2] <- "chrom"
 # Replace F1:F6 labels with meaningful names
