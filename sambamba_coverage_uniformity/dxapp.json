@@ -33,6 +33,7 @@
     "file": "src/sambamba_coverage_uniformity.sh"
   },
   "access": {
+    "project": "CONTRIBUTE",
     "allProjects":"VIEW",
     "network": [ "*" ]
   },
