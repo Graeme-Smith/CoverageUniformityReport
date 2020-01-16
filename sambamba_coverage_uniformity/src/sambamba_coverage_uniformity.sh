@@ -44,7 +44,7 @@ main() {
 
     # The docker -v flag mounts a local directory to the docker environment in the format:
     #    -v local_dir:docker_dir
-    docker run -v /home/dnanexus:/home --rm graemesmith/uniform-coverage Rscript "/src/sambamba_exon_coverage.R"  "/home" "/home/coverage/uniformity_metrics"
+    docker run -v /home/dnanexus:/home --rm graemesmith/uniform-coverage Rscript "/src/sambamba_exon_coverage.R"  "/home" "/home/coverage/uniformity_metrics" ".sambamba_output.bed"
 
     # Upload results to DNA nexus
     dx upload /home/dnanexus/coverage/uniformity_metrics --recursive --path $selected_project:coverage/uniformity_metrics
