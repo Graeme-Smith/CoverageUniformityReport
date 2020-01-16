@@ -9,6 +9,7 @@ library(htmlwidgets)
 # Functions:
 
 generate_coverage_plot <- function(df, panel) { 
+
   # Remove rows with NAs caused by regions not included between panels  
   df <- df[complete.cases(df), ]
   # Reorder the factors in region by median (Ensures the boxplots are plotted in order form lowest to highest)
@@ -32,6 +33,7 @@ generate_coverage_plot <- function(df, panel) {
 }
 
 generate_simple_coverage_plot <- function(df, panel) { 
+
   # Remove rows with NAs caused by regions not included between panels  
   df <- df[complete.cases(df), ]
   # Group the tibble data structure by 'region'
@@ -68,19 +70,20 @@ scale_this <- function(x) as.vector(scale(x, scale=TRUE, center = FALSE))
 my_args <- commandArgs(trailingOnly = TRUE)
 data_directory <- my_args[1]
 output_directory <- my_args[2]
+suffix_pattern <- my_args[3]
 
 # Create output directory if it does not already exists
 dir.create(output_directory, showWarnings = FALSE)
 
 # Get all files with the suffix "*..refined.sambamba_output.bed" from data directory
-sambamba_files <- list.files(path = data_directory, pattern = "*.sambamba_output.bed", full.names = TRUE)
+sambamba_files <- list.files(path = data_directory, pattern = paste0("*", suffix_pattern), full.names = TRUE)
 
 # Import coverage data and add relevant sample ID to each imported row 
 tbl <- sapply(sambamba_files , read_tsv, col_types = "ciicicccinnc", simplify=FALSE) %>% 
   bind_rows(.id = "sample_id")
 
 # Simplify & cleanup sample names
-tbl$sample_id <- gsub(basename(tbl$sample_id), pattern = ".sambamba_output.bed", replacement = "")
+tbl$sample_id <- gsub(basename(tbl$sample_id), pattern = suffix_pattern, replacement = "")
 # Rename 2nd column to remove proceding '#'
 colnames(tbl)[2] <- "chrom"
 # Replace F1:F6 labels with meaningful names
@@ -111,22 +114,30 @@ tbl$pan_number <- stringr::str_split(string = tbl$sample_id, pattern = "_", simp
 
 # Extract meta data from sample name
 for(run_name in unique(tbl$run_name)){
+  print(paste("Processing run name =", run_name))
 for(panel in unique(tbl$pan_number)){
-
+  print(paste("Processing panel number =", run_name))
+  
   df <- tbl[tbl$pan_number==panel,]
   
   # Update number of samples to be plotted 
   num_samples <- length(unique(df$sample_id))
+  print(paste("Number of samples =", num_samples))
+  
   # Update number of target regions for this panel
-  num_target_regions <- length(unique(df$region))  
+  num_target_regions <- length(unique(df$region))
+  print(paste("Number of target regions =", num_target_regions))
+
   # Generate static plot of data for each
+  print("Generating static ggplot")
   static_plot <- generate_coverage_plot(df, panel)
   
   # Add interactivity to plot:
+  print("Generating Interactive plot")
   interactive_plot <- ggplotly(static_plot)
   
   # Create coverage plot of means for PDF
-  
+  print("Generating simplified plot")
   simplified_plot <- generate_simple_coverage_plot(df, panel)
   
   # Generate file name:
@@ -134,9 +145,12 @@ for(panel in unique(tbl$pan_number)){
   
   # Save interactive plot as a single html file:
   filepath <- paste0(output_directory, '/', filename, "_coverage.html")
+  print(paste0("Saving file", filepath))
   saveWidget(ggplotly(interactive_plot), file = filepath)
+
   # Save simplified plot to pdf:
   filepath <- paste0(output_directory, "/", filename, "_coverage.pdf")
+  print(paste0("Saving file", filepath))
   ggsave(filename = filepath, 
          simplified_plot,
          device = "pdf",
@@ -145,6 +159,7 @@ for(panel in unique(tbl$pan_number)){
          units = "mm")
   # Save table
   filepath <- paste0(output_directory, "/", filename, "_coverage.csv")
+  print(paste0("Saving file", filepath))
   summary_df <- df %>% 
     group_by(region) %>% 
   # Summarise data by region
@@ -156,6 +171,7 @@ for(panel in unique(tbl$pan_number)){
               accessionNum = unique(accessionNum),
               region_meanCoverage = mean(scaled_meanCoverage)) %>%
     arrange(region_meanCoverage)
+  print("Saving CSV file") 
   write_delim(summary_df, filepath, delim = "\t")
 }
 }
